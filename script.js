@@ -32,22 +32,66 @@ document.getElementById("year").textContent = new Date().getFullYear();
 
 /* Contact form */
 
+/* Contact form */
+
 const contactForm = document.getElementById("contactForm");
 const formMessage = document.getElementById("formMessage");
 
-contactForm.addEventListener("submit", function (event) {
+contactForm.addEventListener("submit", async function (event) {
 
-event.preventDefault();
+    event.preventDefault();
 
-const name = document.getElementById("name").value.trim();
-const email = document.getElementById("email").value.trim();
-const subject = document.getElementById("subject").value.trim();
-const message = document.getElementById("message").value.trim();
+    const name = document.getElementById("name").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const subject = document.getElementById("subject").value.trim();
+    const message = document.getElementById("message").value.trim();
 
-if (!name || !email || !subject || !message) {
-    formMessage.textContent = "Please complete all fields.";
-    formMessage.style.color = "#d93025";
-    return;
+    if (!name || !email || !subject || !message) {
+        formMessage.textContent = "Please complete all fields.";
+        formMessage.style.color = "#d93025";
+        return;
+    }
+
+    formMessage.textContent = "Sending message...";
+    formMessage.style.color = "#20b996";
+
+    try {
+
+        const response = await fetch("http://localhost:3000/api/contact", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                name: name,
+                email: email,
+                subject: subject,
+                message: message
+            })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.error || "Something went wrong.");
+        }
+
+        formMessage.textContent = "Message sent successfully!";
+        formMessage.style.color = "#20b996";
+
+        contactForm.reset();
+
+    } catch (error) {
+
+        console.error(error);
+
+        formMessage.textContent =
+            "Could not send message. Please try again.";
+
+        formMessage.style.color = "#d93025";
+    }
+
+});
 }
 
 /*
